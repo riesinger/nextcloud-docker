@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    # Publish `main` as Docker `latest` image.
+    branches:
+      - main
+
+    # Publish `1.2.3` tags as releases.
+    tags:
+      - '*'
+
+env:
+  IMAGE_NAME: nextcloud
+
+jobs:
+  # Build and push the docker image
+  build:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build image
+        run: docker build . --file Dockerfile --tag $IMAGE_NAME
+      - name: Log into registry
+        run: echo "${{ secrets.REGISTRY_ACCESS_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Push image
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository }}
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          # Strip git ref prefix from version, use latest instead of master
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,' | sed -e 's/^main$/latest/')
+          VERSIONS=$VERSION
+          # If a tag was published, build all the versions (1, 1.2, 1.2.3)
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSIONS="$(echo $VERSION | sed -e 's/^v//') $(echo $VERSION | sed -E 's/^v//;s/[.].*//g') $(echo $VERSION | sed -E 's/^v//;s/^(\d+[.]\d+)[.].*/\1/') latest"
+
+          for version in $VERSIONS; do
+            echo IMAGE_ID=$IMAGE_ID
+            echo version=$version
+
+            docker tag $IMAGE_NAME $IMAGE_ID:$version
+          docker push $IMAGE_ID:$version
+          done
