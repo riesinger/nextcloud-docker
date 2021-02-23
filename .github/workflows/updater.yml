@@ -13,6 +13,8 @@ jobs:
   get-version:
     runs-on: ubuntu-latest
     steps:
+      # Since the Github releases don't get properly updated by the nextcloud team, get the version from their website
       - run: >-
-          CURRENT_VERSION="$(curl 'https://nextcloud.com/install/#instructions-server' | grep 'download.nextcloud.com/server/releases/nextcloud-.*.zip"' | head -n1 | sed -E 's/.*nextcloud-([0-9]+\.[0-9]+\.[0-9]).*/\1/')"
-          echo "The current version of Nextcloud is: ${CURRENT_VERSION}"
+          export LATEST_VERSION="$(curl 'https://nextcloud.com/install/#instructions-server' | grep 'download.nextcloud.com/server/releases/nextcloud-.*.zip"' | head -n1 | sed -E 's/.*nextcloud-([0-9]+\.[0-9]+\.[0-9]).*/\1/')"
+      - run: >-
+          echo "The current version of Nextcloud is: ${LATEST_VERSION}"
