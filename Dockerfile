@@ -135,9 +135,17 @@ RUN set -ex; \
     "; \
     apt-get update; \
     apt-get install -y --no-install-recommends $fetchDeps; \
-    git clone https://github.com/nextcloud/server -b v21.0.0 --depth=1 --recursive; \
-    mkdir /usr/src/nextcloud -p; \
-    mv server/* /usr/src/nextcloud; \
+    curl -fsSL -o nextcloud.tar.bz2 \
+        "https://download.nextcloud.com/server/releases/nextcloud-${NEXTCLOUD_VERSION}.tar.bz2"; \
+    curl -fsSL -o nextcloud.tar.bz2.asc \
+        "https://download.nextcloud.com/server/releases/nextcloud-${NEXTCLOUD_VERSION}.tar.bz2.asc"; \
+    export GNUPGHOME="$(mktemp -d)"; \
+# gpg key from https://nextcloud.com/nextcloud.asc
+    gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys 28806A878AE423A28372792ED75899B9A724937A; \
+    gpg --batch --verify nextcloud.tar.bz2.asc nextcloud.tar.bz2; \
+    tar -xjf nextcloud.tar.bz2 -C /usr/src/; \
+    gpgconf --kill all; \
+    rm nextcloud.tar.*; \
     rm -rf "$GNUPGHOME" /usr/src/nextcloud/updater; \
     mkdir -p /usr/src/nextcloud/data; \
     mkdir -p /usr/src/nextcloud/custom_apps; \
