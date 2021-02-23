@@ -131,16 +131,13 @@ RUN set -ex; \
     fetchDeps=" \
         gnupg \
         dirmngr \
+        git \
     "; \
     apt-get update; \
     apt-get install -y --no-install-recommends $fetchDeps; \
-    \
-     curl -fsSL -o nextcloud.tar.gz \
-        "https://github.com/nextcloud/server/archive/v${NEXTCLOUD_VERSION}.tar.gz"; \
-    tar -xf nextcloud.tar.gz -C /usr/src/; \
-    mv /usr/src/server-21.0.0 /usr/src/nextcloud; \
-    gpgconf --kill all; \
-    rm nextcloud.tar.*; \
+    git clone https://github.com/nextcloud/server -b v21.0.0 --depth=1 --recursive; \
+    mkdir /usr/src/nextcloud -p; \
+    mv server/* /usr/src/nextcloud; \
     rm -rf "$GNUPGHOME" /usr/src/nextcloud/updater; \
     mkdir -p /usr/src/nextcloud/data; \
     mkdir -p /usr/src/nextcloud/custom_apps; \

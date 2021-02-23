@@ -6,8 +6,12 @@ things to make using the image less painful.
 
 ## Changes from the official image
 
-Currently, only `ffmpeg` is added to the official image. This makes it possible to generate file
-previews for videos.
+Right now, the differences between this and the official Nextcloud 21 image are:
+
+* Use PHP8 as the base instead of PHP7
+* Include `ffmpeg` by default
+* Include `ocrmypdf` by default
+* Include `vim` by default
 
 ## Using this docker image
 
