@@ -1,0 +1,18 @@
+# This workflow grabs the latest Nextcloud release version and tries to open a PR on this repo to keep it up-to-date
+name: Updater
+
+# Controls when the action will run. 
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  get-version:
+    runs-on: ubuntu-latest
+    steps:
+      - run: >-
+          CURRENT_VERSION="$(curl 'https://nextcloud.com/install/#instructions-server' | grep 'download.nextcloud.com/server/releases/nextcloud-.*.zip"' | head -n1 | sed -E 's/.*nextcloud-([0-9]+\.[0-9]+\.[0-9]).*/\1/')"
+          echo "The current version of Nextcloud is: ${CURRENT_VERSION}"
